@@ -1,103 +1,29 @@
-# ESP Drone
+# Datasheets
 
-A small, lightweight ESP32-S3 quadcopter built as an embedded-systems and robotics learning platform.
+Index of reference documents for the ESP Drone hardware. Download each PDF and save it in this folder using the suggested filename. Links point to the manufacturer wherever possible; manufacturers sometimes move files, so if a link breaks, search the part number on their site.
 
-> **Status:** Planning (started 2026-09-17) · **Priority:** Medium · **Type:** Embedded + Robotics + Learning
+## Downloads
 
-This is **not** a production flight controller. It is a simple, inexpensive, easy-to-modify platform for learning quadcopter flight control, stabilization, motor control, and wireless communication, built to be understood, debugged, and improved gradually rather than finished all at once.
+| Component | Document | Save as | Link |
+|-----------|----------|---------|------|
+| Seeed XIAO ESP32S3 Sense | Schematic (PDF) and pinout sheet (XLSX) | `xiao-esp32s3-sense-schematic.pdf` | [Seeed wiki, "Resources" section](https://wiki.seeedstudio.com/xiao_esp32s3_getting_started/) |
+| Seeed XIAO ESP32S3 Sense | Pin multiplexing guide | (read online) | [Seeed wiki](https://wiki.seeedstudio.com/xiao_esp32s3_pin_multiplexing/) |
+| ESP32-S3 (SoC) | Datasheet | `esp32-s3-datasheet.pdf` | [Espressif](https://www.espressif.com/sites/default/files/documentation/esp32-s3_datasheet_en.pdf) |
+| ESP32-S3 (SoC) | Technical Reference Manual | `esp32-s3-trm.pdf` | [Espressif](https://documentation.espressif.com/esp32-s3_technical_reference_manual_en.pdf) |
+| BNO085 IMU | Datasheet | `bno085-datasheet.pdf` | [CEVA](https://www.ceva-ip.com/wp-content/uploads/BNO080_085-Datasheet.pdf) |
+| BNO085 IMU | SH-2 Reference Manual (sensor reports and protocol) | `sh-2-reference-manual.pdf` | [CEVA](https://www.ceva-ip.com/wp-content/uploads/SH-2-Reference-Manual.pdf) |
+| BNO085 IMU | Product brief | `bno085-product-brief.pdf` | [CEVA](https://www.ceva-ip.com/wp-content/uploads/BNO080_085-Product-Brief.pdf) |
+| IRLML2502 MOSFET | Datasheet (Infineon) | `irlml2502-datasheet.pdf` | [Infineon PDF](https://www.infineon.com/dgdl/irlml2502pbf-1.pdf?fileId=5546d462533600a4015356680e672608) |
+| IRLML2502 MOSFET | Product page (SPICE models, notices) | (read online) | [Infineon](https://www.infineon.com/part/IRLML2502) |
+| 720 coreless motor | Seller spec listing (generic part; no formal datasheet) | `720-motor-listing.pdf` | [Example listing (Chaoli CL720)](https://racer.lt/item/chaoli-cl-720-7x20mm-coreless-motor-for-90mm-150mm-diy-micro-fpv-rc-quadcopter-frame-1951.html) |
 
-## Goals
+## Not yet available
 
-- Build a small, flight-capable platform that I can program and experiment with.
-- Learn the fundamentals of flight control, stabilization, motor control, and wireless communication.
-- Keep the design simple enough to understand, modify, and troubleshoot myself.
+- **1S 400 mAh LiPo:** save the seller's listing (capacity, C-rating, connector type) once purchased.
+- **1S charger:** save the listing or datasheet once chosen. The XIAO ESP32S3 has its own battery charging circuit, so check whether a separate charger is needed.
+- **BNO085 breakout board:** if you are using a breakout (e.g. from Adafruit or SparkFun) rather than the bare chip, save that board's schematic and pinout too.
 
-## Overview
+## Notes
 
-An ESP32-S3 quadcopter with four coreless brushed motors and a BNO085 IMU. The ESP32-S3 runs the flight controller and handles wireless communication:
-
-- **BLE** for joystick-based control
-- **Wi-Fi** for PC-based control and experimentation
-- **ESP-NOW** to be investigated
-
-## Hardware
-
-| Subsystem | Parts |
-|-----------|-------|
-| Controller | Seeed Studio XIAO ESP32-S3 (Sense/CAM variant), BNO085 IMU |
-| Propulsion | 4× 720 coreless brushed motors, 4× matching props (2 CW, 2 CCW) |
-| Motor drive | 4× IRLML2502 N-channel MOSFET, gate resistors, gate pulldowns, bulk + decoupling capacitors, flyback protection (TBD) |
-| Power | 1S 400 mAh LiPo, 1S charger, connector, battery voltage monitoring |
-| Mechanical | Small carbon-fiber frame, motor mounts, perfboard (V1 prototype), 28 AWG wire |
-
-See [`hardware/bom.csv`](hardware/bom.csv) for the full parts list once it is added.
-
-## Software
-
-Modular C++ firmware for the ESP32-S3 (PlatformIO + Arduino-ESP32, FreeRTOS underneath), plus Python tools for the PC side.
-
-- **Control:** PID, motor mixing, PWM
-- **Estimation:** sensor fusion, attitude estimation (Kalman filtering if needed)
-- **Libraries:** Adafruit BNO08x, ESP32 BLE, ESP32 Wi-Fi
-- **Later:** Rust experiments, Micro-ROS
-
-## Repository Structure
-
-```
-esp-drone/
-├── docs/            # overview, roadmap, architecture, hardware notes, references
-├── hardware/        # schematic, perfboard layout, BOM, datasheets, mechanical
-├── firmware/
-│   ├── src/         # main.cpp: wires modules together only
-│   ├── lib/         # replaceable modules (imu, estimation, control, motors, comms, battery, config)
-│   ├── bringup/     # standalone per-subsystem test programs
-│   └── test/        # PC-side unit tests (PID, mixer)
-├── tools/           # Python control, telemetry, and analysis scripts
-└── data/            # logged measurements with setup notes
-```
-
-Folders are created as they are needed, so some of these may not exist yet.
-
-## Getting Started
-
-> Firmware does not exist yet. This section will be filled in as the project progresses.
-
-Planned workflow:
-
-1. Validate each subsystem on its own with the programs in `firmware/bringup/`, in order: motors, IMU, battery ADC, BLE link, control loop on the bench.
-2. Integrate the validated modules through `firmware/src/main.cpp`.
-3. Tether-test before any free flight.
-
-**Prerequisites (planned):** [PlatformIO](https://platformio.org/), Python 3.10+ for `tools/`.
-
-## Roadmap
-
-- [x] Project concept defined
-- [x] Basic schematic defined
-- [x] Microcontroller, IMU, MOSFETs selected
-- [x] Motors, MOSFETs, perfboards purchased
-- [ ] Buy battery and charger
-- [ ] Detailed schematic
-- [ ] Hardware validation
-- [ ] Software flowchart and architecture
-- [ ] Motor tests
-
-Longer-term ideas (custom PCB, barometer/ToF altitude, optical flow, telemetry, OTA updates, web control, Micro-ROS/ROS2, autonomous flight, RL) are tracked in [`docs/roadmap.md`](docs/roadmap.md).
-
-## Design Principles
-
-- Keep V1 simple.
-- Prioritize understanding over optimization.
-- Test individual subsystems before combining them.
-- Don't add features before basic flight works.
-- Record measurements instead of trusting advertised specs.
-- Keep software modular so components can be swapped easily.
-- Treat V1 as a learning platform for future drone projects.
-
-## Safety
-
-Spinning propellers can cause injury. Remove props during bench testing of anything other than thrust, and take care with LiPo batteries: use a proper 1S charger, never charge unattended, and don't use a damaged cell.
-
-## License
-
-To be decided. See [LICENSE](LICENSE).
+- The 720 motor has no manufacturer datasheet because it is a generic part sold by many sellers. Treat the listing as a rough guide only and rely on your own measurements (`data/measurements/`).
+- Record the source and download date of anything you add, so it is clear which revision you designed against.
